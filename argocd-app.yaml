@@ -1,0 +1,18 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: car-showroom-gitops
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: 'https://github.com/YOUR_GITHUB_USERNAME/car-showroom-app.git'
+    targetRevision: HEAD
+    path: K8s
+  destination:
+    server: 'https://kubernetes.default.svc'
+    namespace: car-showroom
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true

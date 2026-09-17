@@ -1,0 +1,12 @@
+# Ignore Terraform local state
+.terraform/
+*.tfstate
+*.tfstate.backup
+
+# Ignore Python compiled files
+__pycache__/
+*.pyc
+
+# Ignore local OS metadata
+.DS_Store
+Thumbs.db
