@@ -3,6 +3,7 @@ pipeline {
 
     environment {
         DOCKER_HUB_USER = 'abhishaccount'
+        BASE_IMAGE_NAME = 'car-showroom-base'
         IMAGE_NAME      = 'car-showroom-app'
         BUILD_TAG       = "${BUILD_NUMBER}"
     }
@@ -14,20 +15,34 @@ pipeline {
             }
         }
 
-       stage('Build & Push Docker Image') {
-         steps {
-                 withCredentials([usernamePassword(credentialsId: 'docker-credentials', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
-                 bat '''
-                 echo Logging in to Docker Hub...
-                 echo %DOCKER_PASS% | docker login -u %DOCKER_USER% --password-stdin
+        stage('Build & Push Base Image') {
+            steps {
+                withCredentials([usernamePassword(credentialsId: 'docker-credentials', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
+                    bat '''
+                    echo Logging in to Docker Hub...
+                    echo %DOCKER_PASS% | docker login -u %DOCKER_USER% --password-stdin
 
-                 echo Building Docker image... 
-                 docker build -t %DOCKER_HUB_USER%/%IMAGE_NAME%:%BUILD_TAG% -t %DOCKER_HUB_USER%/%IMAGE_NAME%:latest .
+                    echo Building Base Image...
+                    docker build -t %DOCKER_HUB_USER%/%BASE_IMAGE_NAME%:latest -f dockerfile.base .
 
-                 echo Pushing images...
-                 docker push %DOCKER_HUB_USER%/%IMAGE_NAME%:%BUILD_TAG%
-                 docker push %DOCKER_HUB_USER%/%IMAGE_NAME%:latest
-                 '''
+                    echo Pushing Base Image...
+                    docker push %DOCKER_HUB_USER%/%BASE_IMAGE_NAME%:latest
+                    '''
+                }
+            }
+        }
+
+        stage('Build & Push App Image') {
+            steps {
+                withCredentials([usernamePassword(credentialsId: 'docker-credentials', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
+                    bat '''
+                    echo Building App Image... 
+                    docker build -t %DOCKER_HUB_USER%/%IMAGE_NAME%:%BUILD_TAG% -t %DOCKER_HUB_USER%/%IMAGE_NAME%:latest .
+
+                    echo Pushing App Images...
+                    docker push %DOCKER_HUB_USER%/%IMAGE_NAME%:%BUILD_TAG%
+                    docker push %DOCKER_HUB_USER%/%IMAGE_NAME%:latest
+                    '''
                 }
             }
         }
@@ -36,6 +51,8 @@ pipeline {
             steps {
                 withCredentials([string(credentialsId: 'github-token', variable: 'GH_TOKEN')]) {
                     bat """
+                    powershell -Command "(Get-Content K8s/app-deployment.yaml) -replace 'image: %DOCKER_HUB_USER%/%IMAGE_NAME%:.*', 'image: %DOCKER_HUB_USER%/%IMAGE_NAME%:%BUILD_TAG%' | Set-Content K8s/app-deployment.yaml"
+                    
                     git config user.name "Jenkins CI"
                     git config user.email "jenkins@local.com"
                     git add K8s/app-deployment.yaml

@@ -2,11 +2,9 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: car-showroom-app
-  namespace: car-showroom
-  labels:
-    app: car-showroom-app
+  namespace: default
 spec:
-  replicas: 2
+  replicas: 1
   selector:
     matchLabels:
       app: car-showroom-app
@@ -14,27 +12,36 @@ spec:
     metadata:
       labels:
         app: car-showroom-app
-      annotations:
-        prometheus.io/scrape: "true"
-        prometheus.io/path: "/metrics"
-        prometheus.io/port: "5000"
     spec:
       containers:
-        - name: car-showroom-app
-          image: abhishaccount/car-showroom-app:latest
-          ports:
-            - containerPort: 5000
-          env:
-            - name: MONGO_URI
-              value: "mongodb://mongodb-service.car-showroom.svc.cluster.local:27017/"
+      - name: app
+        image: abhishaccount/car-showroom-app:latest
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 5000
+        env:
+        - name: DISPLAY
+          value: ":99"
+        resources:
+          limits:
+            memory: "2Gi"
+            cpu: "1000m"
+          requests:
+            memory: "512Mi"
+            cpu: "500m"
+        volumeMounts:
+        - mountPath: /dev/shm
+          name: dshm
+      volumes:
+      - name: dshm
+        emptyDir:
+          medium: Memory
 ---
 apiVersion: v1
 kind: Service
 metadata:
   name: car-showroom-service
-  namespace: car-showroom
-  labels:
-    app: car-showroom-app
+  namespace: default
 spec:
   type: NodePort
   selector:
@@ -42,4 +49,4 @@ spec:
   ports:
     - port: 5000
       targetPort: 5000
-      nodePort: 30500
+      nodePort: 30005
