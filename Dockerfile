@@ -1,10 +1,11 @@
 FROM python:3.11-slim
 
-# Install system dependencies required for GUI rendering and Tkinter
-RUN apt-get update && apt-get install -y \
+# Set non-interactive mode for apt to speed up installation
+ENV DEBIAN_FRONTEND=noninteractive
+
+# 1. Install system packages and clean cache in a single layer
+RUN apt-get update && apt-get install -y --no-install-recommends \
     python3-tk \
-    tk-dev \
-    tcl-dev \
     xvfb \
     libgl1 \
     libglib2.0-0 \
@@ -14,15 +15,13 @@ RUN apt-get update && apt-get install -y \
 
 WORKDIR /app
 
-# Copy requirements and install dependencies
+# 2. Leverage Docker cache for Pip (only re-runs if requirements.txt changes!)
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copy application files
+# 3. Copy application code LAST (so code edits don't invalidate pip/apt cache)
 COPY . .
 
-# Set virtual display environment variable
 ENV DISPLAY=:99
 
-# Run app using Xvfb virtual framebuffer
 CMD ["xvfb-run", "--server-args=-screen 0 1024x768x24", "python", "app.py"]

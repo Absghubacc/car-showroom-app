@@ -14,14 +14,20 @@ pipeline {
             }
         }
 
-        stage('Build & Push Docker Image') {
-            steps {
-                withCredentials([usernamePassword(credentialsId: 'docker-credentials', usernameVariable: 'USER', passwordVariable: 'PASS')]) {
-                    bat "docker build -t %DOCKER_HUB_USER%/%IMAGE_NAME%:%BUILD_TAG% ."
-                    bat "docker build -t %DOCKER_HUB_USER%/%IMAGE_NAME%:latest ."
-                    bat "docker login -u %USER% -p %PASS%"
-                    bat "docker push %DOCKER_HUB_USER%/%IMAGE_NAME%:%BUILD_TAG%"
-                    bat "docker push %DOCKER_HUB_USER%/%IMAGE_NAME%:latest"
+       stage('Build & Push Docker Image') {
+         steps {
+                 withCredentials([usernamePassword(credentialsId: 'docker-credentials', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
+                 bat '''
+                 echo Logging in to Docker Hub...
+                 echo %DOCKER_PASS% | docker login -u %DOCKER_USER% --password-stdin
+
+                 echo Building Docker image... 
+                 docker build -t %DOCKER_HUB_USER%/%IMAGE_NAME%:%BUILD_TAG% -t %DOCKER_HUB_USER%/%IMAGE_NAME%:latest .
+
+                 echo Pushing images...
+                 docker push %DOCKER_HUB_USER%/%IMAGE_NAME%:%BUILD_TAG%
+                 docker push %DOCKER_HUB_USER%/%IMAGE_NAME%:latest
+                 '''
                 }
             }
         }
