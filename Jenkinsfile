@@ -47,7 +47,7 @@ pipeline {
             }
         }
 
-        stage('Update Kubernetes Manifests for GitOps') {
+       stage('Update Kubernetes Manifests for GitOps') {
             steps {
                 withCredentials([string(credentialsId: 'github-token', variable: 'GH_TOKEN')]) {
                     bat """
@@ -62,7 +62,6 @@ pipeline {
                 }
             }
         }
-    }
 
     post {
         always {
