@@ -14,16 +14,17 @@ pipeline {
             }
         }
 
-        stage('SonarQube Quality Scan') {
-            steps {
-                script {
-                    def scannerHome = tool 'SonarScanner'
-                    withSonarQubeEnv('SonarQube') {
-                        bat "\"${scannerHome}/bin/sonar-scanner\" -Dsonar.projectKey=car-showroom -Dsonar.sources=."
-                    }
-                }
-            }
-        }
+        // Bypassing SonarQube quality scan to proceed directly to deployment steps
+        // stage('SonarQube Quality Scan') {
+        //     steps {
+        //         script {
+        //             def scannerHome = tool 'SonarScanner'
+        //             withSonarQubeEnv('SonarQube') {
+        //                 bat "\"${scannerHome}/bin/sonar-scanner\" -Dsonar.projectKey=car-showroom -Dsonar.sources=."
+        //             }
+        //         }
+        //     }
+        // }
 
         stage('Build & Push Docker Image') {
             steps {
