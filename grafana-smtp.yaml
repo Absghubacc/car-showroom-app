@@ -1,0 +1,11 @@
+grafana:
+  assertNoLeakedSecrets: false
+  grafana.ini:
+    smtp:
+      enabled: true
+      host: smtp.gmail.com:587
+      user: abapptestingpurpose@gmail.com
+      password: ifiz vunx lzqi tqwu
+      skip_verify: true
+      from_address: abapptestingpurpose@gmail.com
+      from_name: Grafana Alerts

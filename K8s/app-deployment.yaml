@@ -21,7 +21,7 @@ spec:
     spec:
       containers:
         - name: car-showroom-app
-          image: DOCKERHUB_USERNAME/car-showroom-app:latest
+          image: abhishaccount/car-showroom-app:latest
           ports:
             - containerPort: 5000
           env:
