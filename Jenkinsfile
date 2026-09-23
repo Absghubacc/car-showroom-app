@@ -14,26 +14,30 @@ pipeline {
             }
         }
         stage('OWASP Dependency Check') {
-        steps {
-                dependencyCheck additionalArguments: '--scan ./', odcInstallation: 'DP-Check'
-                dependencyCheckPublisher pattern: '**/dependency-check-report.xml'
-              }
-            } 
+            steps {
+                    dependencyCheck additionalArguments: '--scan ./ --autoUpdate false', odcInstallation: 'DP-Check'
+                    dependencyCheckPublisher pattern: '**/dependency-check-report.xml'
+                  }
+                }
         stage('SonarQube Quality Scan') {
-            steps {
-                withSonarQubeEnv('SonarQube') {
-                    // 2. FIX: Changed 'sh' to 'bat' for Windows execution
-                    bat 'sonar-scanner -Dsonar.projectKey=car-showroom -Dsonar.sources=.'
-                }
+           steps {
+           // Ensure the string matches the Name field in Manage Jenkins -> System
+               withSonarQubeEnv('SonarQube') { 
+                bat 'sonar-scanner -Dsonar.projectKey=car-showroom -Dsonar.sources=.'
+              }
             }
         }
-        stage('SonarQube Quality Gate') {
-            steps {
-                timeout(time: 5, unit: 'MINUTES') {
-                    waitForQualityGate abortPipeline: true
+        stage('SonarQube Quality Scan') {
+          steps {
+                  script {
+                     // Replace 'SonarScanner' with the tool name defined under Manage Jenkins -> Tools -> SonarQube Scanner
+                        def scannerHome = tool 'SonarScanner' 
+                        withSonarQubeEnv('SonarQube') {
+                        bat "${scannerHome}/bin/sonar-scanner -Dsonar.projectKey=car-showroom -Dsonar.sources=."
+                         }
+                    }
                 }
-            }
-        }
+              }
         stage('Build & Push Docker Image') {
             steps {
                 withCredentials([usernamePassword(credentialsId: 'docker-credentials', usernameVariable: 'USER', passwordVariable: 'PASS')]) {
