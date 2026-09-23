@@ -63,15 +63,10 @@ pipeline {
             }
         }
     }
-    post {
-        always {
-            cleanWs()
-        }
-      }
-    }
 
     post {
         always {
+            cleanWs()
             emailext (
                 subject: "Jenkins Build ${currentBuild.fullDisplayName} - ${currentBuild.result}",
                 body: """
