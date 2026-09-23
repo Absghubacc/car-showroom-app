@@ -14,24 +14,12 @@ pipeline {
             }
         }
 
-        // Bypassing SonarQube quality scan to proceed directly to deployment steps
-        // stage('SonarQube Quality Scan') {
-        //     steps {
-        //         script {
-        //             def scannerHome = tool 'SonarScanner'
-        //             withSonarQubeEnv('SonarQube') {
-        //                 bat "\"${scannerHome}/bin/sonar-scanner\" -Dsonar.projectKey=car-showroom -Dsonar.sources=."
-        //             }
-        //         }
-        //     }
-        // }
-
         stage('Build & Push Docker Image') {
             steps {
                 withCredentials([usernamePassword(credentialsId: 'docker-credentials', usernameVariable: 'USER', passwordVariable: 'PASS')]) {
                     bat "docker build -t %DOCKER_HUB_USER%/%IMAGE_NAME%:%BUILD_TAG% ."
                     bat "docker build -t %DOCKER_HUB_USER%/%IMAGE_NAME%:latest ."
-                    bat "echo %PASS% | docker login -u %USER% --password-stdin"
+                    bat "docker login -u %USER% -p %PASS%"
                     bat "docker push %DOCKER_HUB_USER%/%IMAGE_NAME%:%BUILD_TAG%"
                     bat "docker push %DOCKER_HUB_USER%/%IMAGE_NAME%:latest"
                 }
