@@ -14,11 +14,11 @@ pipeline {
             }
         }
         stage('OWASP Dependency Check') {
-            steps {
-                dependencyCheck additionalArguments: '--scan ./', odcInstallation: 'Default'
+        steps {
+                dependencyCheck additionalArguments: '--scan ./', odcInstallation: 'DP-Check'
                 dependencyCheckPublisher pattern: '**/dependency-check-report.xml'
-            }
-        }
+              }
+            } 
         stage('SonarQube Quality Scan') {
             steps {
                 withSonarQubeEnv('SonarQube') {
