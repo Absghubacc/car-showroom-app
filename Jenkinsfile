@@ -16,7 +16,7 @@ pipeline {
 
         stage('OWASP Dependency Check') {
             steps {
-                dependencyCheck additionalArguments: '--scan ./ --autoUpdate false', odcInstallation: 'DP-Check'
+                dependencyCheck additionalArguments: '--scan ./ -n', odcInstallation: 'DP-Check'
                 dependencyCheckPublisher pattern: '**/dependency-check-report.xml'
             }
         }
@@ -24,7 +24,6 @@ pipeline {
         stage('SonarQube Quality Scan') {
             steps {
                 script {
-                    // Make sure 'SonarScanner' matches the name under Manage Jenkins -> Tools -> SonarQube Scanner
                     def scannerHome = tool 'SonarScanner'
                     withSonarQubeEnv('SonarQube') {
                         bat "\"${scannerHome}/bin/sonar-scanner\" -Dsonar.projectKey=car-showroom -Dsonar.sources=."
