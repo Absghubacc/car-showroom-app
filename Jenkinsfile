@@ -14,23 +14,12 @@ pipeline {
             }
         }
 
-        // OWASP stage bypassed temporarily until NVD data feed is initialized locally
-        // stage('OWASP Dependency Check') {
-        //     steps {
-        //         dependencyCheck additionalArguments: '--scan ./ -n', odcInstallation: 'DP-Check'
-        //         dependencyCheckPublisher pattern: '**/dependency-check-report.xml'
-        //     }
-        // }
-
         stage('SonarQube Quality Scan') {
             steps {
                 script {
                     def scannerHome = tool 'SonarScanner'
                     withSonarQubeEnv('SonarQube') {
-                        // Injects sonar.login token using 'sonarqube-token' ID
-                        withCredentials([string(credentialsId: 'sonarqube-token', variable: 'SONAR_TOKEN')]) {
-                            bat "\"${scannerHome}/bin/sonar-scanner\" -Dsonar.projectKey=car-showroom -Dsonar.sources=. -Dsonar.login=%SONAR_TOKEN%"
-                        }
+                        bat "\"${scannerHome}/bin/sonar-scanner\" -Dsonar.projectKey=car-showroom -Dsonar.sources=."
                     }
                 }
             }
