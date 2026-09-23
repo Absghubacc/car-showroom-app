@@ -14,7 +14,7 @@ pipeline {
             }
         }
 
-        // Temporarily commented out OWASP to bypass the empty DB issue and speed up build
+        // OWASP stage bypassed temporarily until NVD data feed is initialized locally
         // stage('OWASP Dependency Check') {
         //     steps {
         //         dependencyCheck additionalArguments: '--scan ./ -n', odcInstallation: 'DP-Check'
@@ -27,8 +27,8 @@ pipeline {
                 script {
                     def scannerHome = tool 'SonarScanner'
                     withSonarQubeEnv('SonarQube') {
-                        // Injects sonar.login token automatically from Jenkins credentials
-                        withCredentials([string(credentialsId: 'sonar-token', variable: 'SONAR_TOKEN')]) {
+                        // Injects sonar.login token using 'sonarqube-token' ID
+                        withCredentials([string(credentialsId: 'sonarqube-token', variable: 'SONAR_TOKEN')]) {
                             bat "\"${scannerHome}/bin/sonar-scanner\" -Dsonar.projectKey=car-showroom -Dsonar.sources=. -Dsonar.login=%SONAR_TOKEN%"
                         }
                     }
